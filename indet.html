@@ -1,310 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lynk Face‑Swap Streaming Guide</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #e2e8f0;
-            --accent: #38bdf8;
-            --code-bg: #0f172a;
-            --border: #334155;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            padding: 2rem 1rem;
-        }
-        .container { max-width: 960px; margin: 0 auto; }
-        h1, h2, h3 { color: var(--accent); margin: 1.5rem 0 1rem; }
-        h1 { font-size: 2.5rem; text-align: center; }
-        h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
-        h3 { margin-top: 1.2rem; }
-        p { margin-bottom: 1rem; }
-        pre {
-            background: var(--code-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            border: 1px solid var(--border);
-            font-size: 0.9rem;
-            position: relative;
-        }
-        code { font-family: 'Fira Code', monospace; }
-        .inline-code {
-            background: var(--code-bg);
-            padding: 0.2em 0.4em;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        button.copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--accent);
-            border: none;
-            color: black;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-        button.copy-btn:hover { opacity: 1; }
-        .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            border: 1px solid var(--border);
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
-        .note {
-            background: #1e3a5f;
-            border-left: 4px solid var(--accent);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-        .diagram {
-            background: var(--card);
-            padding: 1rem;
-            text-align: center;
-            font-family: monospace;
-            white-space: pre;
-            overflow-x: auto;
-            margin: 1rem 0;
-            border-radius: 8px;
-        }
-        a { color: var(--accent); }
-        ul, ol { margin-left: 2rem; margin-bottom: 1rem; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Lynkio · Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; line-height: 1.5; scroll-behavior: smooth; overflow-x: hidden; }
+    .navbar { position: fixed; top: 0; left: 0; width: 100%; background: rgba(255,255,255,0.96); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(226,232,240,0.9); z-index: 1000; }
+    .nav-container { max-width: 1400px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; }
+    .logo-area { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+    .logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, #0c4a6e, #0284c7); background-clip: text; -webkit-background-clip: text; color: transparent; }
+    .version { background: #e2e8f0; border-radius: 40px; padding: 0.2rem 0.7rem; font-size: 0.7rem; font-weight: 600; color: #1e293b; }
+    .nav-links { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+    .nav-links a { text-decoration: none; font-weight: 500; color: #334155; transition: 0.2s; font-size: 0.9rem; white-space: nowrap; }
+    .nav-links a:hover { color: #0284c7; }
+    .menu-btn { display: none; font-size: 1.5rem; background: none; border: none; cursor: pointer; color: #0f172a; }
+    .hero { padding: 7rem 1.5rem 4rem; background: linear-gradient(145deg, #f0f9ff 0%, #eef2ff 100%); border-bottom: 1px solid #e0e7ff; }
+    .hero-inner { max-width: 1200px; margin: 0 auto; }
+    .hero h1 { font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 800; background: linear-gradient(to right, #0c4a6e, #1e3a8a); background-clip: text; -webkit-background-clip: text; color: transparent; margin-bottom: 1rem; }
+    .hero p { font-size: clamp(1rem, 4vw, 1.25rem); max-width: 700px; color: #1e293b; margin-bottom: 2rem; }
+    .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary, .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.5rem; border-radius: 40px; font-weight: 600; text-decoration: none; transition: 0.2s; font-size: 0.95rem; }
+    .btn-primary { background: #0f172a; color: white; }
+    .btn-primary:hover { background: #1e293b; transform: translateY(-2px); box-shadow: 0 10px 20px -8px rgba(0,0,0,0.15); }
+    .btn-outline { background: transparent; border: 1px solid #0c4a6e; color: #0c4a6e; }
+    .btn-outline:hover { background: #0c4a6e10; transform: translateY(-2px); }
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 1.5rem; }
+    section { padding: 3rem 0; border-bottom: 1px solid #eef2f6; scroll-margin-top: 85px; }
+    .section-title { font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-left: 5px solid #0284c7; padding-left: 1rem; }
+    .subsection-title { font-size: 1.4rem; font-weight: 600; margin: 1.5rem 0 1rem; color: #0f172a; }
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.8rem; margin: 2rem 0; }
+    .card { background: white; border-radius: 1.5rem; padding: 1.5rem; border: 1px solid #eef2f6; transition: 0.25s; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    .card:hover { transform: translateY(-5px); border-color: #cbd5e1; box-shadow: 0 20px 25px -12px rgba(0,0,0,0.08); }
+    .card i { font-size: 2rem; color: #0284c7; margin-bottom: 1rem; }
+    .code-block { background: #0f172a; color: #e2e8f0; border-radius: 1.2rem; padding: 1rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin: 1.5rem 0; position: relative; white-space: pre-wrap; word-break: break-word; }
+    .code-block pre { margin: 0; font-family: inherit; white-space: pre-wrap; word-break: break-word; }
+    .copy-btn { position: absolute; top: 0.6rem; right: 0.6rem; background: #334155; border: none; color: white; border-radius: 8px; padding: 0.2rem 0.7rem; font-size: 0.7rem; cursor: pointer; z-index: 2; }
+    .badge { background: #e0f2fe; color: #0369a1; border-radius: 30px; padding: 0.2rem 0.9rem; font-size: 0.7rem; font-weight: 500; display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem; white-space: nowrap; }
+    .table-wrapper { overflow-x: auto; margin: 1.5rem 0; border-radius: 1rem; }
+    .api-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 1rem; min-width: 600px; }
+    .api-table th, .api-table td { text-align: left; padding: 0.8rem; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; vertical-align: top; }
+    .api-table th { background: #f8fafc; font-weight: 600; }
+    .back-to-top { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #0f172a; color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: 0.2s; z-index: 99; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    footer { text-align: center; padding: 2rem 1rem; color: #5b6e8c; border-top: 1px solid #e2e8f0; font-size: 0.85rem; }
+    @media (max-width: 860px) {
+      .menu-btn { display: block; }
+      .nav-links { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: 0.8rem; margin-top: 0.8rem; }
+      .nav-links.show { display: flex; }
+      .nav-links a { white-space: normal; }
+      .hero { padding: 6rem 1rem 3rem; }
+      .container { padding: 0 1rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .api-table th, .api-table td { padding: 0.6rem; font-size: 0.8rem; }
+      .code-block { font-size: 0.7rem; }
+    }
+  </style>
 </head>
 <body>
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo-area"><span class="logo">Lynkio</span><span class="version">v1.2.7</span></div>
+    <button class="menu-btn" id="menuToggle"><i class="fas fa-bars"></i></button>
+    <div class="nav-links" id="navLinks">
+      <a href="#intro">Intro</a><a href="#core">Core</a><a href="#http">HTTP</a><a href="#ws">WebSocket</a><a href="#udp">UDP</a><a href="#rooms">Rooms</a><a href="#tasks">Tasks</a><a href="#db">DB</a><a href="#clients">Clients</a><a href="#api-ref">API</a>
+    </div>
+  </div>
+</nav>
+<main>
+<div class="hero">
+  <div class="hero-inner">
+    <h1>Lynkio · Real‑Time Event Engine</h1>
+    <p>Pure Python, zero dependencies — HTTP routing, WebSockets (RFC6455), UDP datagram server, and AUTO mode on one port. Rooms, binary events, background tasks, scheduler, soketDB logging, and full client SDKs.</p>
+    <div class="btn-group">
+      <a href="#core" class="btn-primary"><i class="fas fa-cogs"></i> Explore API</a>
+      <a href="https://pypi.org/project/lynkio" class="btn-outline"><i class="fab fa-python"></i> pip install lynkio==1.2.7</a>
+    </div>
+  </div>
+</div>
 <div class="container">
-    <h1>🔁 Lynk Real‑Time Face‑Swap Streaming</h1>
-    <p style="text-align:center;color:#94a3b8;">How to use the binary WebSocket server, connect any client, and build your own pipeline</p>
-
-    <!-- INTRO -->
-    <div class="card">
-        <h2>🌐 Overview</h2>
-        <p>Lynk is a pure‑Python real‑time engine supporting HTTP, WebSocket, and UDP on the same port. The face‑swap system uses <strong>named binary events</strong> sent over WebSocket. A camera client sends raw video frames as a <code class="inline-code">"video_frame"</code> event; the server processes them with InsightFace and replies with a <code class="inline-code">"swapped_frame"</code> event.</p>
-        <div class="diagram">
-┌──────────┐       WebSocket        ┌──────────────┐
-│  Client  │ ◄──────────────────────► │   Lynk       │
-│ (camera) │   "video_frame"          │   Server     │
-│          │   "swapped_frame"        │ (face‑swap) │
-└──────────┘                          └──────┬───────┘
-                                             │
-                                      Multiprocessing
-                                      worker (InsightFace)
-        </div>
-        <p>This guide explains every piece from scratch – you can use our ready clients or write your own in any language.</p>
+  <!-- Introduction & philosophy -->
+  <section id="intro">
+    <div class="section-title"><i class="fas fa-info-circle"></i> What is Lynkio?</div>
+    <p>Lynkio is a lightweight, high‑performance framework for building real‑time web applications using only the Python standard library. It combines a native HTTP router, a full WebSocket implementation (RFC6455), a UDP datagram server, and an innovative <strong>AUTO mode</strong> that serves TCP (HTTP/WebSocket) and UDP concurrently on the same port. Designed for simplicity and control, Lynkio has no external dependencies except optional integration with soketDB for logging.</p>
+    <div class="feature-grid" style="margin-top:1.5rem">
+      <div class="card"><i class="fas fa-bolt"></i> <strong>Pure Python, async/await</strong><br>Leverages asyncio for high concurrency.</div>
+      <div class="card"><i class="fas fa-box"></i> <strong>Zero external deps</strong><br>Only standard library – easy to deploy.</div>
+      <div class="card"><i class="fas fa-shield-alt"></i> <strong>Standards compliant</strong><br>HTTP/1.1, WebSocket (RFC6455), UDP.</div>
+      <div class="card"><i class="fas fa-chart-line"></i> <strong>Production ready</strong><br>Graceful shutdown, rate limiting, CORS.</div>
     </div>
+  </section>
 
-    <!-- BINARY EVENT PROTOCOL -->
-    <h2>📦 Binary Event Protocol</h2>
-    <div class="card">
-        <p>Every binary WebSocket frame is tagged with an event name so handlers can route it. The server and client libraries handle the header automatically.</p>
-        <h3>Frame structure (big‑endian)</h3>
-        <div class="diagram">
-+----------------+-------------------+---------------------------+
-| 2 bytes        | event_name bytes  | payload (raw data)       |
-| (event name    | (UTF‑8 encoded)   |                          |
-|  length)       |                   |                          |
-+----------------+-------------------+---------------------------+
-        </div>
-        <p>For example, to send a "video_frame" with 4‑byte ID + image:</p>
-        <pre><code># Python
-name = "video_frame"
-header = struct.pack("!H", len(name)) + name.encode()
-full_payload = header + frame_id_bytes + image_bytes
-await client.ws.send_binary(full_payload)   # generic binary
-
-# Lynk client shortcut (does the header packing)
-await client.ws.send_binary_event("video_frame", frame_id_bytes + image_bytes)</code></pre>
-        <p>Any language that can write a WebSocket binary frame can implement this header.</p>
+  <!-- Core: Lynk class, constructor, protocols -->
+  <section id="core">
+    <div class="section-title"><i class="fas fa-cog"></i> Core – Lynk() constructor</div>
+    <p>The <code>Lynk</code> class is the main entry point. It configures the server and exposes all routing decorators and methods.</p>
+    <div class="table-wrapper">
+      <table class="api-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>host</code></td><td>str</td><td>"0.0.0.0"</td><td>Bind address</td></tr>
+          <tr><td><code>port</code></td><td>int</td><td>8765</td><td>Listen port</td></tr>
+          <tr><td><code>protocol</code></td><td>str</td><td>"TCP"</td><td>"TCP" (HTTP+WS), "UDP", or "AUTO" (TCP+UDP same port)</td></tr>
+          <tr><td><code>max_payload_size</code></td><td>int</td><td>256*1024</td><td>Max WebSocket frame / UDP datagram size</td></tr>
+          <tr><td><code>max_message_size</code></td><td>int</td><td>1024*1024</td><td>Max fragmented WebSocket message</td></tr>
+          <tr><td><code>max_body_size</code></td><td>int</td><td>1024*1024</td><td>Max HTTP request body</td></tr>
+          <tr><td><code>max_connections</code></td><td>int/None</td><td>None</td><td>Max concurrent WebSocket clients</td></tr>
+          <tr><td><code>rate_limit</code></td><td>int/None</td><td>None</td><td>Messages per second per client/UDP token</td></tr>
+          <tr><td><code>enable_keep_alive</code></td><td>bool</td><td>False</td><td>HTTP keep‑alive connections</td></tr>
+          <tr><td><code>debug</code></td><td>bool</td><td>False</td><td>Enable debug logging</td></tr>
+          <tr><td><code>enable_database</code></td><td>bool</td><td>False</td><td>Enable soketDB integration</td></tr>
+          <tr><td><code>database_config</code></td><td>dict</td><td>None</td><td>soketDB options (primary_storage, backups, cloud)</td></tr>
+          <tr><td><code>serve_client</code></td><td>bool</td><td>False</td><td>Serve built‑in JS client at <code>/lynkio/client.js</code></td></tr>
+          <tr><td><code>client_path</code></td><td>str</td><td>"/lynkio/client.js"</td><td>Custom path for JS client</td></tr>
+        </tbody>
+      </table>
     </div>
+    <div class="code-block"><pre>from lynkio import Lynk
+app = Lynk(host="0.0.0.0", port=8080, protocol="AUTO", rate_limit=30, debug=True)</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p>The server is started with <code>app.run()</code> which installs signal handlers for graceful shutdown.</p>
+  </section>
 
-    <!-- SERVER SETUP -->
-    <h2>🖥️ The Lynk Server (face_swap_server.py)</h2>
-    <div class="card">
-        <h3>1. Import &amp; Configuration</h3>
-        <pre><code>from lynkio import Lynk
-app = Lynk(host="0.0.0.0", port=8765, protocol="TCP",
-            max_message_size=640*480*3+1024)
-app.enable_cors(["*"])</code></pre>
-        <p>We use TCP mode because WebSocket runs on top of TCP. The max message size accommodates raw 640×480 BGR frames plus header.</p>
+  <!-- HTTP Routing (full details) -->
+  <section id="http">
+    <div class="section-title"><i class="fas fa-globe"></i> HTTP Routing & Responses</div>
+    <div class="subsection-title">Decorators</div>
+    <p><code>@app.get(path)</code>, <code>@app.post(path)</code>, <code>@app.put(path)</code>, <code>@app.delete(path)</code>, <code>@app.patch(path)</code>, <code>@app.route(path, methods)</code>.<br>Path parameters: <code>/user/&lt;user_id&gt;</code> or <code>/post/{post_id}</code>. They become keyword arguments in the handler.</p>
+    <div class="code-block"><pre>@app.get("/users/&lt;user_id&gt;/posts/&lt;post_id&gt;")
+async def get_post(req, user_id, post_id):
+    return {"user": user_id, "post": post_id}</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="subsection-title">Request object</div>
+    <p><code>req.method</code>, <code>req.path</code>, <code>req.headers</code> (dict), <code>req.body</code> (bytes), <code>req.client_ip</code>, <code>req.query_params</code> (dict), <code>req.cookies</code> (dict), <code>await req.json()</code>, <code>await req.form()</code>.</p>
+    <div class="subsection-title">Response helpers</div>
+    <ul style="margin-left:1.5rem; margin-bottom:1rem;">
+      <li><code>json_response(data, status=200)</code> – returns JSON response.</li>
+      <li><code>redirect(location, status=302)</code> – HTTP redirect.</li>
+      <li><code>abort(status_code, message)</code> – raises HTTPError.</li>
+      <li><code>send_file(filepath, as_attachment=False, cache_control=None, ...)</code> – streams a file with support for Content-Disposition, Last‑Modified, Cache‑Control.</li>
+      <li><code>render_template(template_name, context=None, template_dir="templates")</code> – basic template with <code>{{ variable.nested }}</code> syntax.</li>
+      <li><code>FileResponse</code> and <code>StreamingResponse</code> classes for custom streaming.</li>
+    </ul>
+    <div class="code-block"><pre>from lynkio import send_file, render_template
 
-        <h3>2. Register a named binary event handler</h3>
-        <pre><code>@app.on_binary_event("video_frame")
-async def on_video(client, data: bytes):
-    # data = everything after the event name header
-    frame_id = int.from_bytes(data[:4], 'little')
-    image = np.frombuffer(data[4:], ...)
-    # queue for processing
-    frame_queue.put_nowait((client.id, image, frame_id))</code></pre>
-        <p>The decorator strips the event name header – your handler only receives the payload you care about.</p>
+@app.get("/download")
+async def download(req):
+    return send_file("report.pdf", as_attachment=True, cache_control="max-age=3600")
 
-        <h3>3. Background tasks (processor &amp; sender)</h3>
-        <pre><code>@app.task
-async def processor():
-    while True:
-        cid, frame, fid = await frame_queue.get()
-        in_q.put((cid, frame, fid))          # to multiprocessing worker
-        # collect results from out_q ...
+@app.get("/page")
+async def page(req):
+    return render_template("index.html", {"title": "Lynkio"})</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="subsection-title">Static files & route groups</div>
+    <p><code>app.static(prefix, directory)</code> – serves files from a directory, prevents directory traversal.<br><code>app.group(prefix)</code> – returns a <code>RouteGroup</code> that can have its own middleware and routes.</p>
+    <div class="code-block"><pre>app.static("/assets", "public")
+api = app.group("/api/v1")
+@api.get("/health")
+async def health(req):
+    return {"status": "ok"}</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="subsection-title">HTTP Middleware & CORS</div>
+    <p>Add functions to <code>app._http_middleware</code> (list) – each receives <code>req</code> and can return <code>None</code> or a response (bytes).<br>Built‑in CORS: <code>app.enable_cors(allowed_origins, allow_credentials)</code> adds the middleware and handles preflight.</p>
+    <div class="code-block"><pre>app.enable_cors(["https://example.com"], allow_credentials=True)</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- WebSocket deep dive -->
+  <section id="ws">
+    <div class="section-title"><i class="fab fa-weixin"></i> WebSocket Server</div>
+    <p>WebSocket upgrade is automatic when the client sends an <code>Upgrade: websocket</code> header. Lynkio implements RFC6455 with fragmentation, ping/pong heartbeat, and binary frames.</p>
+    <div class="subsection-title">Connection object</div>
+    <p>Inside event handlers, <code>client</code> is a <code>Connection</code> instance with:<br><code>client.id</code> (unique UUID), <code>client.session</code> (dict for custom data), <code>client.rooms</code> (set of rooms), <code>await client.send(payload, text=True)</code>, <code>await client.ping()</code>, <code>await client.close(code, reason)</code>.</p>
+    <div class="subsection-title">Event handlers</div>
+    <p><code>@app.on(event_name)</code> – receives JSON messages with <code>{"event": ..., "data": ...}</code>.<br><code>@app.on_binary</code> – receives raw binary payloads.<br><code>@app.on_binary_event(name)</code> – receives named binary events (client sends a 2‑byte length header + name).</p>
+    <div class="code-block"><pre>@app.on("chat")
+async def chat(client, data):
+    await app.emit_to_room(data["room"], "chat", data["text"])
+
+@app.on_binary_event("image")
+async def image_stream(client, payload: bytes):
+    print(f"Received image chunk {len(payload)} bytes")</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="subsection-title">WebSocket middleware</div>
+    <p><code>@app.middleware</code> – each middleware receives <code>(client, event, data)</code> and can return modified data or raise <code>StopProcessing</code> to reject the event.</p>
+    <div class="code-block"><pre>@app.middleware
+async def auth_mw(client, event, data):
+    if event == "admin" and not client.session.get("auth"):
+        raise StopProcessing
+    return data</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- Rooms & Pub/Sub -->
+  <section id="rooms">
+    <div class="section-title"><i class="fas fa-door-open"></i> Rooms & Pub/Sub</div>
+    <p>Rooms allow grouping clients. Methods: <code>app.join_room(client_id, room)</code>, <code>app.leave_room(client_id, room)</code>, <code>app.emit_to_room(room, event, data, exclude=None)</code> (batched to avoid event loop overload), <code>app.get_room_clients(room) -> Set[str]</code>. Broadcasting to all clients: <code>await app.emit(event, data)</code> (client_id=None).</p>
+    <div class="code-block"><pre>@app.on("join")
+async def join_room(client, data):
+    app.join_room(client.id, data["room"])
+    await app.emit_to_room(data["room"], "system", f"{client.id} joined")</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- UDP & AUTO mode -->
+  <section id="udp">
+    <div class="section-title"><i class="fas fa-satellite-dish"></i> UDP Datagram Server & AUTO Mode</div>
+    <p><code>@app.udp(path)</code> – registers a handler for UDP JSON messages. The message must contain a <code>"path"</code> field, optionally <code>"data"</code> and <code>"client_id"</code> for rate limiting. The handler receives a <code>Request</code> object (method="UDP"). Response is sent back as a UDP datagram. AUTO mode runs both TCP (HTTP/WebSocket) and UDP on the same port simultaneously.</p>
+    <div class="code-block"><pre>@app.udp("/sensor")
+async def sensor(req):
+    payload = await req.json()
+    return {"status": "ok", "echo": payload}
+
+# Client example:
+# echo '{"path":"/sensor","data":{"temp":22.5},"client_id":"sensor1"}' | nc -u localhost 8765</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p>UDP supports the same HTTP middleware chain, rate limiting (based on <code>client_id</code> or IP:port), and max payload enforcement.</p>
+  </section>
+
+  <!-- Background tasks & scheduler -->
+  <section id="tasks">
+    <div class="section-title"><i class="fas fa-tasks"></i> Background Tasks & Scheduler</div>
+    <p><code>@app.task</code> – registers an async function that starts when the server runs and should loop until <code>app._running</code> becomes False.<br><code>@app.schedule(interval)</code> – runs the coroutine periodically every <code>interval</code> seconds (cron‑like). Both are automatically cancelled on graceful shutdown.</p>
+    <div class="code-block"><pre>@app.task
+async def monitor():
+    while app._running:
+        await asyncio.sleep(30)
+        print(f"Active connections: {len(app._clients)}")
+
+@app.schedule(3600)
+async def hourly_cleanup():
+    await app.query_database("logs", "DELETE FROM old_entries")</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- Database & logging -->
+  <section id="db">
+    <div class="section-title"><i class="fas fa-database"></i> soketDB Integration & Logging</div>
+    <p>Lynkio includes soketDB, a lightweight file‑based database with async support. Set <code>enable_database=True</code> and optionally provide <code>database_config</code> (primary_storage, backups, cloud providers).</p>
+    <div class="code-block"><pre>app = Lynk(enable_database=True)
+db = app.create_database("myapp", create_log_table=True, auto_sync_log=True)</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p>When <code>create_log_table=True</code>, three tables are created: <code>http_logs</code>, <code>wss_logs</code>, <code>runtime_logs</code>. If <code>auto_sync_log=True</code>, every HTTP request, WebSocket message, connect/disconnect, and runtime event is automatically inserted asynchronously.</p>
+    <p>Manual logging: <code>await app.add_log(table, **kwargs)</code> where table is 'http', 'wss', or 'runtime'.<br>Distributed queries: <code>await app.query_database(db_name, sql, params=None)</code> – runs on any registered soketDB instance in a thread executor (non‑blocking).</p>
+    <div class="code-block"><pre>await app.add_log("runtime", level="INFO", message="Custom event", source="auth")
+rows = await app.query_database("myapp", "SELECT * FROM http_logs WHERE status_code = $1", (200,))</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- Clients: JS and Python -->
+  <section id="clients">
+    <div class="section-title"><i class="fas fa-code"></i> Official Clients</div>
+    <div class="subsection-title">JavaScript Client (built‑in)</div>
+    <p>Include <code>&lt;script src="/lynkio/client.js"&gt;&lt;/script&gt;</code> (set <code>serve_client=True</code>). The global <code>LynkClient</code> class provides auto‑reconnect, binary events, rooms, and task scheduling.</p>
+    <div class="code-block"><pre>const client = new LynkClient("ws://localhost:8765", { maxReconnectAttempts: 10 });
+client.on("message", (data) => console.log(data));
+client.onBinary("audio", (payload) => { /* Uint8Array */ });
+client.connect().then(() => {
+  client.joinRoom("lobby");
+  client.emit("chat", { text: "hi" });
+  client.sendBinaryEvent("image", new Uint8Array([1,2,3]));
+  let tid = client.createTask(() => client.emit("ping", {}), 5000);
+});
+client.close();</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="subsection-title">Python Client (lynkio_client)</div>
+    <p>Full async client with WebSocket, HTTP, and UDP support. Import from <code>lynkio_client</code>.</p>
+    <div class="code-block"><pre>from lynkio_client import LynkClient
+import asyncio
+
+async def main():
+    client = LynkClient("localhost", 8765)
+    await client.ws.connect()
+    client.on("greet", print)
+    await client.ws.emit("ping", "hello")
+    await client.ws.send_binary_event("data", b'\x01\x02')
+    # HTTP
+    status, headers, body = await client.http.get("/api/status")
+    # UDP
+    resp = await client.udp.send(b'{"path":"/ping"}')
+    await client.ws.close()
+asyncio.run(main())</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p>Separate classes: <code>WebSocketClient</code>, <code>HTTPClient</code>, <code>UDPClient</code> are also available.</p>
+  </section>
+
+  <!-- Advanced features: plugins, fetch, internal events -->
+  <section id="advanced-extra">
+    <div class="section-title"><i class="fas fa-plug"></i> Plugins, Fetch & Internal Hooks</div>
+    <p><strong>Plugin system</strong>: <code>app.use(plugin)</code> where plugin is a callable that receives the app instance – can add routes, middleware, etc.</p>
+    <div class="code-block"><pre>def metrics_plugin(app):
+    @app.get("/metrics")
+    async def metrics(req):
+        return {"clients": len(app._clients)}
+app.use(metrics_plugin)</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p><strong>Internal HTTP client</strong>: <code>await app.fetch(url, method, headers, body, json, timeout)</code> – returns a <code>FetchResponse</code> with <code>.json()</code>, <code>.text()</code>, <code>.content</code>.</p>
+    <div class="code-block"><pre>resp = await app.fetch("https://api.example.com/data")
+data = await resp.json()</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <p><strong>Internal events</strong>: <code>@app.on_internal(event)</code> for <code>"connect"</code>, <code>"disconnect"</code>, <code>"subscribe"</code>, <code>"unsubscribe"</code>, <code>"message"</code> – useful for analytics.</p>
+    <div class="code-block"><pre>@app.on_internal("connect")
+async def on_connect(client, _):
+    print(f"New client {client.id}")</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
+
+  <!-- Full API reference table (everything) -->
+  <section id="api-ref">
+    <div class="section-title"><i class="fas fa-book"></i> Complete Method Reference</div>
+    <div class="table-wrapper">
+      <table class="api-table">
+        <thead><tr><th>Method / Decorator</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>@app.get(path)</code>, <code>.post</code>, <code>.put</code>, <code>.delete</code>, <code>.patch</code></td><td>HTTP route with path parameters (<code>&lt;id&gt;</code>).</td></tr>
+          <tr><td><code>@app.route(path, methods)</code></td><td>Explicit HTTP methods list.</td></tr>
+          <tr><td><code>app.static(prefix, dir)</code></td><td>Serve static files from directory.</td></tr>
+          <tr><td><code>app.group(prefix)</code></td><td>Route group with shared middleware.</td></tr>
+          <tr><td><code>@app.on(event)</code></td><td>WebSocket JSON event handler.</td></tr>
+          <tr><td><code>@app.on_binary</code></td><td>Generic binary WebSocket handler.</td></tr>
+          <tr><td><code>@app.on_binary_event(name)</code></td><td>Named binary event handler.</td></tr>
+          <tr><td><code>@app.middleware</code></td><td>WebSocket middleware (can raise StopProcessing).</td></tr>
+          <tr><td><code>@app.udp(path)</code></td><td>UDP datagram route (JSON required).</td></tr>
+          <tr><td><code>app.join_room(cid, room)</code></td><td>Add client to room.</td></tr>
+          <tr><td><code>app.leave_room(cid, room)</code></td><td>Remove client from room.</td></tr>
+          <tr><td><code>app.emit_to_room(room, event, data, exclude)</code></td><td>Batch broadcast to all clients in room.</td></tr>
+          <tr><td><code>app.get_room_clients(room) -> Set[str]</code></td><td>Return client IDs in room.</td></tr>
+          <tr><td><code>app.emit(event, data, client_id=None)</code></td><td>Send to one client or broadcast if client_id=None.</td></tr>
+          <tr><td><code>app.send_binary_event(cid, name, data)</code></td><td>Send named binary event to client.</td></tr>
+          <tr><td><code>@app.task</code></td><td>Background coroutine that runs at server start.</td></tr>
+          <tr><td><code>@app.schedule(interval)</code></td><td>Periodic scheduled task (seconds).</td></tr>
+          <tr><td><code>app.create_database(name, create_log_table, auto_sync_log)</code></td><td>Initialize soketDB and optionally log tables.</td></tr>
+          <tr><td><code>app.add_log(table, **kwargs)</code></td><td>Manual log entry (http/wss/runtime).</td></tr>
+          <tr><td><code>app.query_database(db_name, sql, params=None)</code></td><td>Async query on any registered soketDB.</td></tr>
+          <tr><td><code>app.enable_cors(origins, credentials)</code></td><td>Enable CORS globally.</td></tr>
+          <tr><td><code>app.use(plugin)</code></td><td>Register a plugin (callable).</td></tr>
+          <tr><td><code>app.fetch(url, ...)</code></td><td>Async HTTP client inside server.</td></tr>
+          <tr><td><code>app.run()</code></td><td>Start the server (blocking).</td></tr>
+          <tr><td><code>app.stop()</code></td><td>Graceful shutdown.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Full chat example -->
+  <section>
+    <div class="section-title"><i class="fas fa-comments"></i> Complete Real‑Time Chat Server</div>
+    <div class="code-block"><pre>from lynkio import Lynk, render_template
+
+app = Lynk(protocol="AUTO", serve_client=True, enable_database=True)
+app.create_database("chat_logs", create_log_table=True, auto_sync_log=True)
+
+@app.get("/")
+async def index(req):
+    return render_template("chat.html", {"title": "Lynkio Chat"})
+
+@app.on("join")
+async def join(client, data):
+    name = data.get("name", "anon")
+    client.session["name"] = name
+    app.join_room(client.id, "main")
+    await app.emit_to_room("main", "system", f"{name} joined")
+
+@app.on("msg")
+async def message(client, data):
+    await app.emit_to_room("main", "chat", {
+        "name": client.session.get("name"),
+        "text": data["text"]
+    })
 
 @app.task
-async def send_results():
-    while True:
-        await asyncio.sleep(0.005)
-        # send back via send_binary_event()
-        await app.send_binary_event(cid, "swapped_frame", payload)</code></pre>
-        <p>Lynk automatically runs tasks when the server starts.</p>
+async def stats():
+    while app._running:
+        await asyncio.sleep(60)
+        print(f"Active connections: {len(app._clients)}")
 
-        <h3>4. Multiprocessing worker</h3>
-        <p>InsightFace runs in a separate process to avoid blocking the async loop. Data is exchanged with <code class="inline-code">multiprocessing.Queue</code>.</p>
-        <pre><code>def worker_process(in_q, out_q):
-    # load models (once)
-    swapper = get_model("inswapper_128.onnx")
-    ...
-    while True:
-        cid, frame, fid = in_q.get()
-        # detect, swap
-        out_q.put((cid, swapped_frame, fid))</code></pre>
-    </div>
-
-    <!-- CLIENT SETUP -->
-    <h2>📱 The Python Client (face_swap_client.py)</h2>
-    <div class="card">
-        <h3>1. Connection‑first pattern</h3>
-        <p>Always connect <strong>before</strong> opening the camera. Use a threading event to synchronise:</p>
-        <pre><code>connected_event = threading.Event()
-# Start network thread that sets connected_event after client.ws.connect()
-if not connected_event.wait(timeout=10):
-    print("Connection failed")
-    return
-cap = cv2.VideoCapture(0)   # now safe</code></pre>
-
-        <h3>2. Send frames as named binary events</h3>
-        <pre><code>raw = frame.tobytes()
-msg = frame_id.to_bytes(4, 'little') + raw
-await client.ws.send_binary_event("video_frame", msg)</code></pre>
-
-        <h3>3. Receive swapped frames</h3>
-        <pre><code>def on_swapped(data: bytes):
-    frame_id = int.from_bytes(data[:4], 'little')
-    img = np.frombuffer(data[4:], ...)
-    display_queue.put(img)
-
-client.ws.on_binary_event("swapped_frame", on_swapped)</code></pre>
-    </div>
-
-    <!-- BUILDING YOUR OWN CLIENT -->
-    <h2>🛠️ Building a Client in Any Language</h2>
-    <div class="card">
-        <p>You only need a standard WebSocket library. The binary event header is simple:</p>
-        <ol>
-            <li>Connect to <code class="inline-code">ws://host:8765</code></li>
-            <li>For sending a named event:
-                <pre><code>// JavaScript browser example
-const encoder = new TextEncoder();
-const name = "video_frame";
-const nameBytes = encoder.encode(name);
-const header = new DataView(new ArrayBuffer(2 + nameBytes.length));
-header.setUint16(0, nameBytes.length, false); // big-endian
-// Append name bytes and payload
-const full = new Uint8Array(header.byteLength + nameBytes.length + payload.length);
-full.set(new Uint8Array(header.buffer), 0);
-full.set(nameBytes, 2);
-full.set(payload, 2 + nameBytes.length);
-websocket.send(full.buffer);</code></pre>
-            </li>
-            <li>For receiving, read the first 2 bytes to get the name length, then the name, then the rest is payload. Dispatch accordingly.</li>
-        </ol>
-        <p>The same logic works in C++, Flutter, Go, etc. – any WebSocket client that supports binary frames.</p>
-    </div>
-
-    <!-- DEBUGGING -->
-    <h2>🔍 Debugging Blank / No Connection</h2>
-    <div class="card">
-        <div class="grid-2">
-            <div>
-                <h3>Server side</h3>
-                <ul>
-                    <li>Enable logging: <code class="inline-code">logging.basicConfig(level=logging.INFO)</code></li>
-                    <li>Check for <strong>"Worker ready"</strong> – if missing, the model/source image path is wrong.</li>
-                    <li>Look for <strong>"Received video frame"</strong> – if absent, the client isn't reaching the server.</li>
-                    <li>Use <code class="inline-code">ctx_id=-1</code> for CPU in WSL; <code class="inline-code">ctx_id=0</code> for GPU.</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Client side</h3>
-                <ul>
-                    <li>The window shows raw camera feed if no swapped frames arrive – that proves camera + connection work.</li>
-                    <li>Check terminal prints: "Connected", "Sent frame X", "Received swapped frame Y".</li>
-                    <li>Ensure <code class="inline-code">SERVER_HOST</code> is correct (WSL2 IP or localhost with portproxy).</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- EXTENDING -->
-    <h2>🧩 Adding More Streams (Audio, Controls)</h2>
-    <div class="card">
-        <p>Because we use named binary events, adding a second stream is trivial:</p>
-        <h3>Server</h3>
-        <pre><code>@app.on_binary_event("audio_chunk")
-async def on_audio(client, data):
-    # data is raw audio bytes
-    process_audio(data)</code></pre>
-        <h3>Client</h3>
-        <pre><code>await client.ws.send_binary_event("audio_chunk", mic_bytes)</code></pre>
-        <p>Each stream stays independent – the video code doesn’t need to change at all.</p>
-    </div>
-
-    <!-- FULL SCRIPTS -->
-    <h2>📜 Complete Face‑Swap Code</h2>
-    <div class="card">
-        <p>The full server and client are ready to copy‑paste. They use the public Lynk API and work on WSL2 + Windows.</p>
-        <ul>
-            <li><strong>Server</strong>: <code class="inline-code">face_swap_server.py</code> (runs in Ubuntu/WSL)</li>
-            <li><strong>Client</strong>: <code class="inline-code">face_swap_client.py</code> (runs on Windows with camera)</li>
-        </ul>
-        <p>Make sure the enhanced <code class="inline-code">lynkio.py</code> (with <code class="inline-code">on_binary_event</code> / <code class="inline-code">send_binary_event</code>) is in the same directory.</p>
-    </div>
-
-    <!-- FOOTER -->
-    <p style="text-align:center;margin-top:3rem;color:#64748b;">Lynk – pure Python, no dependencies beyond the standard library + OpenCV/InsightFace. Build anything real‑time.</p>
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  </section>
 </div>
-
+<footer><i class="fas fa-bolt"></i> Lynkio – 1.2.7<br>Built by Alex Austin · MIT License</footer>
+</main>
+<button class="back-to-top" id="backToTop"><i class="fas fa-arrow-up"></i></button>
 <script>
-// Copy buttons for code blocks
-document.querySelectorAll('pre').forEach(pre => {
-    const btn = document.createElement('button');
-    btn.className = 'copy-btn';
-    btn.textContent = 'Copy';
-    btn.addEventListener('click', () => {
-        const code = pre.querySelector('code') || pre;
-        navigator.clipboard.writeText(code.textContent).then(() => {
-            btn.textContent = 'Copied!';
-            setTimeout(() => btn.textContent = 'Copy', 2000);
-        });
-    });
-    pre.style.position = 'relative';
-    pre.appendChild(btn);
-});
+  function copyCode(btn) { const pre = btn.parentElement.querySelector('pre'); navigator.clipboard.writeText(pre.innerText).then(() => { const orig = btn.innerText; btn.innerText = '✓ Copied!'; setTimeout(() => btn.innerText = orig, 1800); }); }
+  window.copyCode = copyCode;
+  const menuBtn = document.getElementById('menuToggle'), navLinks = document.getElementById('navLinks');
+  if(menuBtn) menuBtn.addEventListener('click', () => navLinks.classList.toggle('show'));
+  const backBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', () => backBtn.style.opacity = window.scrollY > 500 ? '1' : '0');
+  backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.querySelectorAll('.nav-links a, .btn-primary, .btn-outline').forEach(a => a.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if(href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if(target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+      if(navLinks.classList.contains('show')) navLinks.classList.remove('show');
+    }
+  }));
 </script>
 </body>
 </html>
