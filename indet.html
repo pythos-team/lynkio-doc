@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lynk Face‑Swap Streaming Guide</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #e2e8f0;
+            --accent: #38bdf8;
+            --code-bg: #0f172a;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container { max-width: 960px; margin: 0 auto; }
+        h1, h2, h3 { color: var(--accent); margin: 1.5rem 0 1rem; }
+        h1 { font-size: 2.5rem; text-align: center; }
+        h2 { border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+        h3 { margin-top: 1.2rem; }
+        p { margin-bottom: 1rem; }
+        pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            position: relative;
+        }
+        code { font-family: 'Fira Code', monospace; }
+        .inline-code {
+            background: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        button.copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent);
+            border: none;
+            color: black;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        button.copy-btn:hover { opacity: 1; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+        .note {
+            background: #1e3a5f;
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .diagram {
+            background: var(--card);
+            padding: 1rem;
+            text-align: center;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+        a { color: var(--accent); }
+        ul, ol { margin-left: 2rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔁 Lynk Real‑Time Face‑Swap Streaming</h1>
+    <p style="text-align:center;color:#94a3b8;">How to use the binary WebSocket server, connect any client, and build your own pipeline</p>
+
+    <!-- INTRO -->
+    <div class="card">
+        <h2>🌐 Overview</h2>
+        <p>Lynk is a pure‑Python real‑time engine supporting HTTP, WebSocket, and UDP on the same port. The face‑swap system uses <strong>named binary events</strong> sent over WebSocket. A camera client sends raw video frames as a <code class="inline-code">"video_frame"</code> event; the server processes them with InsightFace and replies with a <code class="inline-code">"swapped_frame"</code> event.</p>
+        <div class="diagram">
+┌──────────┐       WebSocket        ┌──────────────┐
+│  Client  │ ◄──────────────────────► │   Lynk       │
+│ (camera) │   "video_frame"          │   Server     │
+│          │   "swapped_frame"        │ (face‑swap) │
+└──────────┘                          └──────┬───────┘
+                                             │
+                                      Multiprocessing
+                                      worker (InsightFace)
+        </div>
+        <p>This guide explains every piece from scratch – you can use our ready clients or write your own in any language.</p>
+    </div>
+
+    <!-- BINARY EVENT PROTOCOL -->
+    <h2>📦 Binary Event Protocol</h2>
+    <div class="card">
+        <p>Every binary WebSocket frame is tagged with an event name so handlers can route it. The server and client libraries handle the header automatically.</p>
+        <h3>Frame structure (big‑endian)</h3>
+        <div class="diagram">
++----------------+-------------------+---------------------------+
+| 2 bytes        | event_name bytes  | payload (raw data)       |
+| (event name    | (UTF‑8 encoded)   |                          |
+|  length)       |                   |                          |
++----------------+-------------------+---------------------------+
+        </div>
+        <p>For example, to send a "video_frame" with 4‑byte ID + image:</p>
+        <pre><code># Python
+name = "video_frame"
+header = struct.pack("!H", len(name)) + name.encode()
+full_payload = header + frame_id_bytes + image_bytes
+await client.ws.send_binary(full_payload)   # generic binary
+
+# Lynk client shortcut (does the header packing)
+await client.ws.send_binary_event("video_frame", frame_id_bytes + image_bytes)</code></pre>
+        <p>Any language that can write a WebSocket binary frame can implement this header.</p>
+    </div>
+
+    <!-- SERVER SETUP -->
+    <h2>🖥️ The Lynk Server (face_swap_server.py)</h2>
+    <div class="card">
+        <h3>1. Import &amp; Configuration</h3>
+        <pre><code>from lynkio import Lynk
+app = Lynk(host="0.0.0.0", port=8765, protocol="TCP",
+            max_message_size=640*480*3+1024)
+app.enable_cors(["*"])</code></pre>
+        <p>We use TCP mode because WebSocket runs on top of TCP. The max message size accommodates raw 640×480 BGR frames plus header.</p>
+
+        <h3>2. Register a named binary event handler</h3>
+        <pre><code>@app.on_binary_event("video_frame")
+async def on_video(client, data: bytes):
+    # data = everything after the event name header
+    frame_id = int.from_bytes(data[:4], 'little')
+    image = np.frombuffer(data[4:], ...)
+    # queue for processing
+    frame_queue.put_nowait((client.id, image, frame_id))</code></pre>
+        <p>The decorator strips the event name header – your handler only receives the payload you care about.</p>
+
+        <h3>3. Background tasks (processor &amp; sender)</h3>
+        <pre><code>@app.task
+async def processor():
+    while True:
+        cid, frame, fid = await frame_queue.get()
+        in_q.put((cid, frame, fid))          # to multiprocessing worker
+        # collect results from out_q ...
+
+@app.task
+async def send_results():
+    while True:
+        await asyncio.sleep(0.005)
+        # send back via send_binary_event()
+        await app.send_binary_event(cid, "swapped_frame", payload)</code></pre>
+        <p>Lynk automatically runs tasks when the server starts.</p>
+
+        <h3>4. Multiprocessing worker</h3>
+        <p>InsightFace runs in a separate process to avoid blocking the async loop. Data is exchanged with <code class="inline-code">multiprocessing.Queue</code>.</p>
+        <pre><code>def worker_process(in_q, out_q):
+    # load models (once)
+    swapper = get_model("inswapper_128.onnx")
+    ...
+    while True:
+        cid, frame, fid = in_q.get()
+        # detect, swap
+        out_q.put((cid, swapped_frame, fid))</code></pre>
+    </div>
+
+    <!-- CLIENT SETUP -->
+    <h2>📱 The Python Client (face_swap_client.py)</h2>
+    <div class="card">
+        <h3>1. Connection‑first pattern</h3>
+        <p>Always connect <strong>before</strong> opening the camera. Use a threading event to synchronise:</p>
+        <pre><code>connected_event = threading.Event()
+# Start network thread that sets connected_event after client.ws.connect()
+if not connected_event.wait(timeout=10):
+    print("Connection failed")
+    return
+cap = cv2.VideoCapture(0)   # now safe</code></pre>
+
+        <h3>2. Send frames as named binary events</h3>
+        <pre><code>raw = frame.tobytes()
+msg = frame_id.to_bytes(4, 'little') + raw
+await client.ws.send_binary_event("video_frame", msg)</code></pre>
+
+        <h3>3. Receive swapped frames</h3>
+        <pre><code>def on_swapped(data: bytes):
+    frame_id = int.from_bytes(data[:4], 'little')
+    img = np.frombuffer(data[4:], ...)
+    display_queue.put(img)
+
+client.ws.on_binary_event("swapped_frame", on_swapped)</code></pre>
+    </div>
+
+    <!-- BUILDING YOUR OWN CLIENT -->
+    <h2>🛠️ Building a Client in Any Language</h2>
+    <div class="card">
+        <p>You only need a standard WebSocket library. The binary event header is simple:</p>
+        <ol>
+            <li>Connect to <code class="inline-code">ws://host:8765</code></li>
+            <li>For sending a named event:
+                <pre><code>// JavaScript browser example
+const encoder = new TextEncoder();
+const name = "video_frame";
+const nameBytes = encoder.encode(name);
+const header = new DataView(new ArrayBuffer(2 + nameBytes.length));
+header.setUint16(0, nameBytes.length, false); // big-endian
+// Append name bytes and payload
+const full = new Uint8Array(header.byteLength + nameBytes.length + payload.length);
+full.set(new Uint8Array(header.buffer), 0);
+full.set(nameBytes, 2);
+full.set(payload, 2 + nameBytes.length);
+websocket.send(full.buffer);</code></pre>
+            </li>
+            <li>For receiving, read the first 2 bytes to get the name length, then the name, then the rest is payload. Dispatch accordingly.</li>
+        </ol>
+        <p>The same logic works in C++, Flutter, Go, etc. – any WebSocket client that supports binary frames.</p>
+    </div>
+
+    <!-- DEBUGGING -->
+    <h2>🔍 Debugging Blank / No Connection</h2>
+    <div class="card">
+        <div class="grid-2">
+            <div>
+                <h3>Server side</h3>
+                <ul>
+                    <li>Enable logging: <code class="inline-code">logging.basicConfig(level=logging.INFO)</code></li>
+                    <li>Check for <strong>"Worker ready"</strong> – if missing, the model/source image path is wrong.</li>
+                    <li>Look for <strong>"Received video frame"</strong> – if absent, the client isn't reaching the server.</li>
+                    <li>Use <code class="inline-code">ctx_id=-1</code> for CPU in WSL; <code class="inline-code">ctx_id=0</code> for GPU.</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Client side</h3>
+                <ul>
+                    <li>The window shows raw camera feed if no swapped frames arrive – that proves camera + connection work.</li>
+                    <li>Check terminal prints: "Connected", "Sent frame X", "Received swapped frame Y".</li>
+                    <li>Ensure <code class="inline-code">SERVER_HOST</code> is correct (WSL2 IP or localhost with portproxy).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTENDING -->
+    <h2>🧩 Adding More Streams (Audio, Controls)</h2>
+    <div class="card">
+        <p>Because we use named binary events, adding a second stream is trivial:</p>
+        <h3>Server</h3>
+        <pre><code>@app.on_binary_event("audio_chunk")
+async def on_audio(client, data):
+    # data is raw audio bytes
+    process_audio(data)</code></pre>
+        <h3>Client</h3>
+        <pre><code>await client.ws.send_binary_event("audio_chunk", mic_bytes)</code></pre>
+        <p>Each stream stays independent – the video code doesn’t need to change at all.</p>
+    </div>
+
+    <!-- FULL SCRIPTS -->
+    <h2>📜 Complete Face‑Swap Code</h2>
+    <div class="card">
+        <p>The full server and client are ready to copy‑paste. They use the public Lynk API and work on WSL2 + Windows.</p>
+        <ul>
+            <li><strong>Server</strong>: <code class="inline-code">face_swap_server.py</code> (runs in Ubuntu/WSL)</li>
+            <li><strong>Client</strong>: <code class="inline-code">face_swap_client.py</code> (runs on Windows with camera)</li>
+        </ul>
+        <p>Make sure the enhanced <code class="inline-code">lynkio.py</code> (with <code class="inline-code">on_binary_event</code> / <code class="inline-code">send_binary_event</code>) is in the same directory.</p>
+    </div>
+
+    <!-- FOOTER -->
+    <p style="text-align:center;margin-top:3rem;color:#64748b;">Lynk – pure Python, no dependencies beyond the standard library + OpenCV/InsightFace. Build anything real‑time.</p>
+</div>
+
+<script>
+// Copy buttons for code blocks
+document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', () => {
+        const code = pre.querySelector('code') || pre;
+        navigator.clipboard.writeText(code.textContent).then(() => {
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        });
+    });
+    pre.style.position = 'relative';
+    pre.appendChild(btn);
+});
+</script>
+</body>
+</html>
